@@ -8,6 +8,11 @@
 import Foundation
 import UIKit
 
+public enum MUEMenuViewAlignment: String, RawRepresentable  {
+    case left
+    case center
+}
+
 public protocol MUEMenuViewDataSource: AnyObject {
     func menuViewTitles(_ pager: MUEMenuView) -> [String]
     func menuViewStartingIndex(_ menu: MUEMenuView) -> Int
@@ -24,14 +29,37 @@ extension MUEMenuViewDelegate {
     func menuView(_ menuView: MUEMenuView, didDeselectItemAt indexPath: IndexPath) { }
 }
 
+public protocol MUEMenuViewFlowLayout: AnyObject {
+    func menuViewMinimumSpacingBetweenItems(_ menuView: MUEMenuView) -> CGFloat
+    func menuView(_ menuView: MUEMenuView, sizeForItemAt indexPath: IndexPath) -> CGSize
+    func menuViewAlignment(_ menuView: MUEMenuView) -> MUEMenuViewAlignment
+}
+
+extension MUEMenuViewFlowLayout {
+    func menuViewMinimumSpacingBetweenItems(_ menuView: MUEMenuView) -> CGFloat {
+        return 0.0
+    }
+    
+    func menuView(_ menuView: MUEMenuView, sizeForItemAt indexPath: IndexPath) -> CGSize { 
+        return .zero
+    }
+    
+    func menuViewAlignment(_ menuView: MUEMenuView) -> MUEMenuViewAlignment { 
+        return .center
+    }
+}
+
 public class MUEMenuView: UIView {
     private var didSetConstraints: Bool = false
+    private var didSetInitialIndex: Bool = false
     private var selectedIndexPath: IndexPath = IndexPath(item: 0, section: 0)
     private var titles: [String] = []
-    private var didSetInitialIndex: Bool = false
+    private var currentAlignment: MUEMenuViewAlignment = .center
     
     public weak var dataSource: MUEMenuViewDataSource? = nil
     public weak var delegate: MUEMenuViewDelegate? = nil
+    public weak var flowLayout: MUEMenuViewFlowLayout? = nil
+    
     public var deselectedColor: UIColor = UIColor(red: 0.588, green: 0.588, blue: 0.588, alpha: 1)
     public var selectedColor: UIColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
     public var underLineColor: UIColor = UIColor(red: 1, green: 0.737, blue: 0, alpha: 1)
@@ -48,7 +76,7 @@ public class MUEMenuView: UIView {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        menuCollectionView.frame = frame
+        menuCollectionView.frame = bounds
     }
     
     lazy var menuCollectionView: UICollectionView = {
@@ -179,6 +207,10 @@ extension MUEMenuView: UICollectionViewDelegateFlowLayout {
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         
+        if let sizeForItemAt = flowLayout?.menuView(self, sizeForItemAt: indexPath) {
+            return sizeForItemAt
+        }
+
         if titles.count > 0 {
             let labelWidth = generateLabel(withText: titles[indexPath.item]).widthForLabel(height: frame.size.height)
             return CGSize(width: labelWidth,
@@ -191,25 +223,38 @@ extension MUEMenuView: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return frame.width * 0.0319
+        guard let minimumSpacing = flowLayout?.menuViewMinimumSpacingBetweenItems(self) else {
+            return frame.width * 0.0319
+        }
+        
+        return minimumSpacing
     }
     
     public func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
         
-        var totalCellWidth = 0.0
-        
-        for title in titles {
-            let labelWidth = generateLabel(withText: title).widthForLabel(height: frame.size.height)
-            totalCellWidth += labelWidth
+        var alignment: MUEMenuViewAlignment = .center
+        if let flowLayoutAlignment = flowLayout?.menuViewAlignment(self) {
+            alignment = flowLayoutAlignment
         }
         
-        let totalSpacingWidth = frame.width * 0.0319 * CGFloat(titles.count - 1)
-        
-        let leftInset = (collectionView.frame.width - CGFloat(totalCellWidth + totalSpacingWidth)) / 2
-        let leftInsetAdjusted = max(leftInset, 0) // To avoid negative insets
-        
-        return UIEdgeInsets(top: 0, left: leftInsetAdjusted, bottom: 0, right: 0)
+        if alignment == .center {
+            var totalCellWidth = 0.0
+            
+            for title in titles {
+                let labelWidth = generateLabel(withText: title).widthForLabel(height: frame.size.height)
+                totalCellWidth += labelWidth
+            }
+            
+            let totalSpacingWidth = frame.width * 0.0319 * CGFloat(titles.count - 1)
+            
+            let leftInset = (collectionView.frame.width - CGFloat(totalCellWidth + totalSpacingWidth)) / 2
+            let leftInsetAdjusted = max(leftInset, 0) // To avoid negative insets
+            
+            return UIEdgeInsets(top: 0, left: leftInsetAdjusted, bottom: 0, right: 0)
+        } else {
+            return .zero
+        }
     }
 }

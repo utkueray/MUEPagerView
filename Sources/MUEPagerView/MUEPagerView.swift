@@ -44,7 +44,8 @@ public class MUEPagerView: UIView {
     // MARK: Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+        addSubview(menuView)
+        addSubview(pagesCollectionView)
     }
     
     required init?(coder: NSCoder) {
@@ -52,35 +53,33 @@ public class MUEPagerView: UIView {
     }
     
     public override func layoutSubviews() {
-        super.layoutSubviews()
-        addSubview(pagerMenuView)
-        addSubview(collectionView)
-        
-        let offsetFromSides = frame.width * 0.0246
-        let pagerMenuViewWidth = frame.width - (2 * offsetFromSides)
-        let pagerMenuViewHeight = frame.height * 0.1167
-        pagerMenuView.frame = CGRect(x: offsetFromSides, y: 0, width: pagerMenuViewWidth, height: pagerMenuViewHeight)
-        collectionView.frame = CGRect(x: 0, y: pagerMenuViewHeight, width: frame.width, height: frame.height - pagerMenuViewHeight)
+        super.layoutSubviews()        
+        pagesCollectionViewFlowLayout.itemSize = pagesCollectionView.frame.size
     }
     
-    public lazy var pagerMenuView: MUEMenuView = {
+    public lazy var menuView: MUEMenuView = {
         let view = MUEMenuView()
         view.deselectedColor = menuDeselectedColor
         view.selectedColor = menuSelectedColor
         view.underLineColor = menuUnderLineColor
         view.delegate = self
         view.dataSource = self
+        view.flowLayout = self
         return view
     }()
     
-    lazy var collectionView: UICollectionView = {
+    public lazy var pagesCollectionViewFlowLayout:UICollectionViewFlowLayout = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = .zero
         layout.minimumInteritemSpacing = .zero
         layout.sectionInset = .zero
-        
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        return layout
+    }()
+    
+    public lazy var pagesCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero,
+                                              collectionViewLayout: pagesCollectionViewFlowLayout)
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "pageCell")
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -102,8 +101,8 @@ extension MUEPagerView {
     public func reload() {
         selectedIndexPath = IndexPath(item: dataSource?.pagerViewStartingIndex(self) ?? 0, section: 0)
         titles = dataSource?.pagerViewTitles(self) ?? []
-        pagerMenuView.reload()
-        collectionView.reloadData()
+        menuView.reload()
+        pagesCollectionView.reloadData()
     }
 }
 
@@ -126,12 +125,34 @@ extension MUEPagerView: MUEMenuViewDelegate {
     
     public func menuView(_ menuView: MUEMenuView, didSelectItemAt indexPath: IndexPath) {
         if selectedIndexPath != indexPath {
-            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+            self.pagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         }
     }
     
     public func menuView(_ menuView: MUEMenuView, didDeselectItemAt indexPath: IndexPath) {
         
+    }
+}
+
+// MARK: MUEMenuViewFlowLayout
+extension MUEPagerView: MUEMenuViewFlowLayout {
+    public func menuViewMinimumSpacingBetweenItems(_ menuView: MUEMenuView) -> CGFloat {
+        return menuView.frame.width * 0.0319
+    }
+    
+    public func menuView(_ menuView: MUEMenuView, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if titles.count > 0 {
+            let font = UIFont(name: "Alexandria-SemiBold", size: 16) ?? UIFont.systemFont(ofSize: 16.0)
+            let height = menuView.frame.height
+            let width = titles[indexPath.item].width(font: font, height: height)
+            return CGSize(width: width, height: height)
+        } else {
+            return .zero
+        }
+    }
+    
+    public func menuViewAlignment(_ menuView: MUEMenuView) -> MUEMenuViewAlignment {
+        return .center
     }
 }
 
@@ -159,14 +180,16 @@ extension MUEPagerView: UICollectionViewDataSource {
 
 // MARK: UICollectionViewDelegate
 extension MUEPagerView: UICollectionViewDelegate {
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, 
+                               willDisplay cell: UICollectionViewCell,
+                               forItemAt indexPath: IndexPath) {
         if !didSetInitialIndex {
-            pagerMenuView.selectItem(indexPath: selectedIndexPath)
+            menuView.selectItem(indexPath: selectedIndexPath)
             collectionView.scrollToItem(at: selectedIndexPath, at: .centeredHorizontally, animated: false)
             didSetInitialIndex = true
         } else {
             selectedIndexPath = indexPath
-            pagerMenuView.selectItem(indexPath: indexPath)
+            menuView.selectItem(indexPath: indexPath)
             
             if let page = cell.contentView.subviews.first,
                let delegate = delegate {
@@ -180,32 +203,5 @@ extension MUEPagerView: UICollectionViewDelegate {
            let delegate = delegate {
             delegate.pagerView(self, didEndDisplaying: page, forItemAt: indexPath)
         }
-    }
-}
-
-// MARK: UICollectionViewDelegateFlowLayout
-extension MUEPagerView: UICollectionViewDelegateFlowLayout {
-    public func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: frame.width, height: collectionView.frame.height)
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return .zero
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    }
-    
-    public func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return .zero
     }
 }
