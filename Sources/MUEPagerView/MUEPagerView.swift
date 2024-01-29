@@ -12,10 +12,12 @@ public protocol MUEPagerViewDataSource: AnyObject {
     func pagerViewStartingIndex(_ pager: MUEPagerView) -> Int
     func pagerViewTitles(_ pager: MUEPagerView) -> [String]
     func pager(_ pager: MUEPagerView, pageForIndexPathAt indexPath: IndexPath) -> UIView
+    func pagerViewMenuAlignment() -> MUEMenuViewAlignment?
 }
 
 public extension MUEPagerViewDataSource {
     func pagerViewStartingIndex(_ pager: MUEPagerView) -> Int { return 0 }
+    func pagerViewMenuAlignment() -> MUEMenuViewAlignment? { return .center }
 }
 
 public protocol MUEPagerViewDelegate: AnyObject {
@@ -68,8 +70,8 @@ public class MUEPagerView: UIView {
         return view
     }()
     
-    public lazy var pagesCollectionViewFlowLayout:UICollectionViewFlowLayout = {
-        let layout = UICollectionViewFlowLayout()
+    public lazy var pagesCollectionViewFlowLayout:MUECollectionViewDelegateFlowLayout = {
+        let layout = MUECollectionViewDelegateFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = .zero
         layout.minimumInteritemSpacing = .zero
@@ -152,7 +154,7 @@ extension MUEPagerView: MUEMenuViewFlowLayout {
     }
     
     public func menuViewAlignment(_ menuView: MUEMenuView) -> MUEMenuViewAlignment {
-        return .center
+        return dataSource?.pagerViewMenuAlignment() ?? .center
     }
 }
 

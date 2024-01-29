@@ -80,7 +80,7 @@ public class MUEMenuView: UIView {
     }
     
     lazy var menuCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
+        let layout = MUECollectionViewDelegateFlowLayout()
         layout.scrollDirection = .horizontal
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -88,7 +88,6 @@ public class MUEMenuView: UIView {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = .clear
-        collectionView.isScrollEnabled = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.accessibilityIdentifier = "menuCollectionView"
@@ -185,7 +184,6 @@ extension MUEMenuView: UICollectionViewDelegate {
         delegate?.menuView(self, willDisplay: titles[indexPath.item], forItemAt: indexPath)
         
         if !didSetInitialIndex {
-            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: .centeredHorizontally)
             didSetInitialIndex = true
         }
     }
