@@ -16,7 +16,7 @@ To integrate MUEPagerView into your Xcode project using Swift Package Manager, a
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/utkueray/MUEPagerView", .upToNextMajor(from: "0.1.0"))
+    .package(url: "https://github.com/utkueray/MUPager", .upToNextMajor(from: "0.1.0"))
 ]
 ```
 
