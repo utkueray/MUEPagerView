@@ -51,6 +51,30 @@ func pager(_ pager: MUPager.MUPagerView, pageForIndexPathAt indexPath: IndexPath
     return view
 }
 ```
+
+### MUPagerViewDataSource
+
+```swift
+func pagerViewStartingIndex(_ pager: MUPagerView) -> Int
+func pagerViewMenuItems(_ pager: MUPagerView) -> [MUMenuItem]
+func pager(_ pager: MUPagerView, pageForIndexPathAt indexPath: IndexPath) -> UIView
+```
+
+### MUPagerViewDelegate
+
+```swift
+func pagerView(_ pager: MUPagerView, willDisplay page: UIView, forItemAt indexPath: IndexPath)
+func pagerView(_ pager: MUPagerView, didEndDisplaying page: UIView, forItemAt indexPath: IndexPath)
+```
+
+### MUPagerViewDataSource
+
+```swift
+func pagerViewMenuAlignment() -> MUMenuViewAlignment
+func pagerMenuViewSpacingBetweenMenuItems(_ pager: MUPagerView) -> CGFloat
+func pagerMenuView(_ pager: MUPagerView, widthForItemAt indexPath: IndexPath) -> CGFloat
+```
+
 ## Credits
 
 - Utku Eray ([@utkueray](https://github.com/utkueray))
