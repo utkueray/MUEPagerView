@@ -1,4 +1,4 @@
-# MUEPagerView
+# MUPager
 
 ## Requirements
 
@@ -12,7 +12,7 @@
 
 [Swift Package Manager](https://swift.org/package-manager/) is a tool for managing the distribution of Swift code. It’s integrated with the Swift build system to automate the process of downloading, compiling, and linking dependencies.
 
-To integrate MUEPagerView into your Xcode project using Swift Package Manager, add it to the dependencies value of your `Package.swift`:
+To integrate MUPager into your Xcode project using Swift Package Manager, add it to the dependencies value of your `Package.swift`:
 
 ```swift
 dependencies: [
@@ -25,7 +25,7 @@ dependencies: [
 ### Quick Start
 
 ```swift
-import MUEPagerView
+import MUPager
 
 class ViewController: UIViewController {
 
@@ -47,8 +47,8 @@ class ViewController: UIViewController {
         return view
     }()
 
-    lazy var pagerView: MUEPagerView = {
-        let view = MUEPagerView()
+    lazy var pagerView: MUPager = {
+        let view = MUPager()
         view.menuDeselectedColor = .gray
         view.menuSelectedColor = .white
         view.menuUnderLineColor = .orange
@@ -63,29 +63,29 @@ class ViewController: UIViewController {
         pagerView.reload()
     }
 }
-// MARK: MUEPagerViewDataSource
-extension ViewController: MUEPagerViewDataSource {
-    func pagerViewTitles(_ pager: MUEPagerView) -> [String] {
+// MARK: MUPagerDataSource
+extension ViewController: MUPagerDataSource {
+    func pagerViewTitles(_ pager: MUPager) -> [String] {
         return ["View1", "View2", "View3"]
     }
     
-    func pagerViewStartingIndex(_ pager: MUEPagerView) -> Int {
+    func pagerViewStartingIndex(_ pager: MUPager) -> Int {
         return 0
     }
     
-    func pager(_ pager: MUEPagerView, pageForIndexPathAt indexPath: IndexPath) -> UIView {
+    func pager(_ pager: MUPager, pageForIndexPathAt indexPath: IndexPath) -> UIView {
         let pages = [view1, view2, view3]
         return pages[indexPath.item]
     }
 }
 
-// MARK: MUEPagerViewDelegate
-extension ViewController: MUEPagerViewDelegate {
-    public func pagerView(_ pager: MUEPagerView, willDisplay page: UIView, forItemAt indexPath: IndexPath) {
+// MARK: MUPagerDelegate
+extension ViewController: MUPagerDelegate {
+    public func pagerView(_ pager: MUPager, willDisplay page: UIView, forItemAt indexPath: IndexPath) {
         print("Page:", indexPath)
     }
     
-    func pagerView(_ pager: MUEPagerView, didEndDisplaying page: UIView, forItemAt indexPath: IndexPath) {
+    func pagerView(_ pager: MUPager, didEndDisplaying page: UIView, forItemAt indexPath: IndexPath) {
         
     }
 }
@@ -96,4 +96,4 @@ extension ViewController: MUEPagerViewDelegate {
 
 ## License
 
-MUEPagerView is released under the MIT license. See LICENSE for details.
+MUPager is released under the MIT license. See LICENSE for details.

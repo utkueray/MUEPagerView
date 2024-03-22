@@ -4,19 +4,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "MUEPagerView",
+    name: "MUPager",
     platforms: [.iOS(.v15)],
     products: [
         .library(
-            name: "MUEPagerView",
-            targets: ["MUEPagerView"])
+            name: "MUPager",
+            targets: ["MUPager"])
     ],
     dependencies: [
-        
+        .package(url: "https://github.com/SnapKit/SnapKit.git", .upToNextMajor(from: "5.0.1"))
     ],
     targets: [
         .target(
-            name: "MUEPagerView"
+            name: "MUPager",
+            dependencies: ["SnapKit"]
         )
     ]
 )
