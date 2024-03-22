@@ -27,67 +27,28 @@ dependencies: [
 ```swift
 import MUPager
 
-class ViewController: UIViewController {
+lazy var pager: MUPagerView = {
+    let pager = MUPagerView()
+    pager.menuDeselectedColor = .darkGray
+    pager.menuSelectedColor = .white
+    pager.menuIndicatorColor = .orange
+    pager.dataSource = self
+    return pager
+}()
 
-    lazy var view1: UIView = {
-        let view = UIView()
-        view.backgroundColor = .red
-        return view
-    }()
-    
-    lazy var view2: UIView = {
-        let view = UIView()
-        view.backgroundColor = .green
-        return view
-    }()
-    
-    lazy var view3: UIView = {
-        let view = UIView()
-        view.backgroundColor = .blue
-        return view
-    }()
-
-    lazy var pagerView: MUPager = {
-        let view = MUPager()
-        view.menuDeselectedColor = .gray
-        view.menuSelectedColor = .white
-        view.menuUnderLineColor = .orange
-        view.delegate = self
-        view.dataSource = self
-        return view
-    }()
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        setupUI()
-        pagerView.reload()
-    }
+// MARK: MUPagerViewDataSource
+func pagerViewStartingIndex(_ pager: MUPager.MUPagerView) -> Int {
+    return 0
 }
-// MARK: MUPagerDataSource
-extension ViewController: MUPagerDataSource {
-    func pagerViewTitles(_ pager: MUPager) -> [String] {
-        return ["View1", "View2", "View3"]
-    }
     
-    func pagerViewStartingIndex(_ pager: MUPager) -> Int {
-        return 0
-    }
-    
-    func pager(_ pager: MUPager, pageForIndexPathAt indexPath: IndexPath) -> UIView {
-        let pages = [view1, view2, view3]
-        return pages[indexPath.item]
-    }
+func pagerViewMenuItems(_ pager: MUPager.MUPagerView) -> [MUPager.MUMenuItem] {
+    return menuItems
 }
 
-// MARK: MUPagerDelegate
-extension ViewController: MUPagerDelegate {
-    public func pagerView(_ pager: MUPager, willDisplay page: UIView, forItemAt indexPath: IndexPath) {
-        print("Page:", indexPath)
-    }
-    
-    func pagerView(_ pager: MUPager, didEndDisplaying page: UIView, forItemAt indexPath: IndexPath) {
-        
-    }
+func pager(_ pager: MUPager.MUPagerView, pageForIndexPathAt indexPath: IndexPath) -> UIView {
+    let view = UIView()
+    view.backgroundColor = pageColors[indexPath.item]
+    return view
 }
 ```
 ## Credits
